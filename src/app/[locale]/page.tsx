@@ -1,6 +1,7 @@
 "use client";
 import Image from 'next/image';
 import Link from 'next/link';
+import LiveProMap from '@/components/LiveProMap';
 
 export default function HomePage() {
   return (
@@ -26,8 +27,8 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-sm">
-                <Image src="/assets/icon.png" alt="MAPSCLEAN" width={400} height={400} className="relative z-10 drop-shadow-2xl" />
+              <div className="relative w-full max-w-lg h-[500px]">
+                <LiveProMap />
               </div>
             </div>
           </div>

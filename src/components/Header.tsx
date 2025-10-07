@@ -14,7 +14,7 @@ export default function Header({ initialLocale = 'fr-BE' }: { initialLocale?: st
     <header className="bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link href={`/${locale}`} className="flex items-center gap-2">
-          <Image src="/assets/images/logo.servi.png" alt="MAPSCLEAN" width={140} height={42} className="object-contain" />
+          <Image src="/assets/icon.png" alt="MAPSCLEAN" width={50} height={50} className="object-contain" />
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-base font-medium">
           <Link href={`/${locale}`} className="text-slate-700 hover:text-blue-700 transition-colors">Accueil</Link>
