@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import dynamic from 'next/dynamic';
 
 type ProPresence = {
   uid: string;
@@ -10,19 +11,16 @@ type ProPresence = {
   lastSeen?: number;
 };
 
-declare global {
-  interface Window {
-    google: any;
-    initMap: () => void;
-  }
-}
+// Importar Leaflet dinamicamente para evitar problemas de SSR
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
 export default function LiveProMap() {
   const [onlinePros, setOnlinePros] = useState<ProPresence[]>([]);
   const [loading, setLoading] = useState(true);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, 'presence'), where('isOnline', '==', true));
@@ -48,95 +46,82 @@ export default function LiveProMap() {
   }, []);
 
   // Brussels center (default)
-  const center = { lat: 50.8503, lng: 4.3517 };
+  const center: [number, number] = [50.8503, 4.3517];
   const markers = onlinePros.filter(p => p.approxLocation).map(p => p.approxLocation!);
 
   useEffect(() => {
-    // Carregar Google Maps API
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyD_eJLabb7WYiUB2CEZOUQo2QtYykxDnUw'}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = initMap;
-      document.head.appendChild(script);
-    } else {
-      initMap();
-    }
+    // Carregar CSS do Leaflet
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+
+    // Carregar script do Leaflet
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = () => setMapLoaded(true);
+    document.head.appendChild(script);
 
     return () => {
-      // Limpar marcadores
-      markersRef.current.forEach(marker => marker.setMap(null));
-      markersRef.current = [];
+      // Cleanup
+      document.head.removeChild(link);
+      document.head.removeChild(script);
     };
   }, []);
 
-  useEffect(() => {
-    if (mapInstance.current && markers.length > 0) {
-      // Limpar marcadores antigos
-      markersRef.current.forEach(marker => marker.setMap(null));
-      markersRef.current = [];
-
-      // Adicionar novos marcadores
-      markers.forEach((markerPos, index) => {
-        const marker = new window.google.maps.Marker({
-          position: markerPos,
-          map: mapInstance.current,
-          title: `Profissional ${index + 1}`,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#3B82F6',
-            fillOpacity: 1,
-            strokeColor: '#FFFFFF',
-            strokeWeight: 2
-          },
-          animation: window.google.maps.Animation.BOUNCE
-        });
-        markersRef.current.push(marker);
-      });
-    }
-  }, [markers]);
-
-  const initMap = () => {
-    if (mapRef.current && window.google) {
-      mapInstance.current = new window.google.maps.Map(mapRef.current, {
-        center: center,
-        zoom: 12,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
-      });
-
-      // Marcador central (Bruxelas)
-      new window.google.maps.Marker({
-        position: center,
-        map: mapInstance.current,
-        title: 'Bruxelas, Bélgica',
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: '#EF4444',
-          fillOpacity: 1,
-          strokeColor: '#FFFFFF',
-          strokeWeight: 3
-        }
-      });
-    }
-  };
-
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-200">
-      {/* Google Maps Container */}
-      <div 
-        ref={mapRef} 
-        className="w-full h-full"
-        style={{ minHeight: '400px' }}
-      />
+      {!mapLoaded ? (
+        // Loading state com design moderno
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-blue-600 font-semibold">Chargement de la carte...</p>
+          </div>
+        </div>
+      ) : (
+        // Mapa Leaflet real
+        <MapContainer
+          center={center}
+          zoom={12}
+          className="w-full h-full"
+          style={{ minHeight: '400px' }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          
+          {/* Marcador central (Bruxelas) */}
+          <Marker position={center}>
+            <Popup>
+              <div className="text-center">
+                <h3 className="font-bold text-red-600">Bruxelas, Bélgica</h3>
+                <p className="text-sm text-gray-600">Centre de la ville</p>
+              </div>
+            </Popup>
+          </Marker>
+
+          {/* Marcadores dos profissionais */}
+          {markers.map((markerPos, index) => (
+            <Marker 
+              key={index} 
+              position={[markerPos.lat, markerPos.lng]}
+            >
+              <Popup>
+                <div className="text-center">
+                  <h3 className="font-bold text-blue-600">Profissional {index + 1}</h3>
+                  <p className="text-sm text-gray-600">Disponível agora</p>
+                  <div className="flex items-center justify-center mt-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="ml-1 text-xs text-green-600">En ligne</span>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      )}
 
       {/* Stats overlay */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
