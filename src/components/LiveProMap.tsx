@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 
@@ -10,9 +10,19 @@ type ProPresence = {
   lastSeen?: number;
 };
 
+declare global {
+  interface Window {
+    google: any;
+    initMap: () => void;
+  }
+}
+
 export default function LiveProMap() {
   const [onlinePros, setOnlinePros] = useState<ProPresence[]>([]);
   const [loading, setLoading] = useState(true);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, 'presence'), where('isOnline', '==', true));
@@ -41,78 +51,92 @@ export default function LiveProMap() {
   const center = { lat: 50.8503, lng: 4.3517 };
   const markers = onlinePros.filter(p => p.approxLocation).map(p => p.approxLocation!);
 
+  useEffect(() => {
+    // Carregar Google Maps API
+    if (!window.google) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyD_eJLabb7WYiUB2CEZOUQo2QtYykxDnUw'}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = initMap;
+      document.head.appendChild(script);
+    } else {
+      initMap();
+    }
+
+    return () => {
+      // Limpar marcadores
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mapInstance.current && markers.length > 0) {
+      // Limpar marcadores antigos
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+
+      // Adicionar novos marcadores
+      markers.forEach((markerPos, index) => {
+        const marker = new window.google.maps.Marker({
+          position: markerPos,
+          map: mapInstance.current,
+          title: `Profissional ${index + 1}`,
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#3B82F6',
+            fillOpacity: 1,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 2
+          },
+          animation: window.google.maps.Animation.BOUNCE
+        });
+        markersRef.current.push(marker);
+      });
+    }
+  }, [markers]);
+
+  const initMap = () => {
+    if (mapRef.current && window.google) {
+      mapInstance.current = new window.google.maps.Map(mapRef.current, {
+        center: center,
+        zoom: 12,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
+
+      // Marcador central (Bruxelas)
+      new window.google.maps.Marker({
+        position: center,
+        map: mapInstance.current,
+        title: 'Bruxelas, Bélgica',
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: '#EF4444',
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 3
+        }
+      });
+    }
+  };
+
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-200">
-      {/* Map Background - Estilo Google Maps */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-blue-50 to-green-100">
-        {/* Ruas e avenidas simuladas */}
-        <div className="absolute inset-0 opacity-30">
-          <svg className="w-full h-full">
-            <defs>
-              <pattern id="streets" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 0 30 L 60 30 M 30 0 L 30 60" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-400"/>
-                <circle cx="15" cy="15" r="2" fill="currentColor" className="text-slate-500"/>
-                <circle cx="45" cy="45" r="2" fill="currentColor" className="text-slate-500"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#streets)" />
-          </svg>
-        </div>
-
-        {/* Marcadores de profissionais (posições realistas em Bruxelas) */}
-        {markers.map((m, i) => {
-          // Posições mais realistas baseadas em coordenadas de Bruxelas
-          const positions = [
-            { x: 45, y: 35 }, // Centro
-            { x: 25, y: 25 }, // Norte
-            { x: 65, y: 45 }, // Sul
-            { x: 35, y: 55 }, // Leste
-            { x: 55, y: 25 }  // Oeste
-          ];
-          const pos = positions[i % positions.length];
-          return (
-            <div
-              key={i}
-              className="absolute animate-bounce"
-              style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
-                animationDelay: `${i * 0.3}s`,
-                animationDuration: '2.5s'
-              }}
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
-                <div className="relative w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Marcador central (Bruxelas) */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="relative">
-            <div className="absolute inset-0 bg-red-500 rounded-full blur-xl opacity-50 animate-ping"></div>
-            <div className="relative w-8 h-8 bg-red-500 rounded-full border-3 border-white shadow-2xl flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Área de zoom simulada */}
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
-          <div className="flex flex-col gap-1">
-            <button className="w-8 h-8 bg-white border border-slate-300 rounded flex items-center justify-center hover:bg-slate-50">
-              <span className="text-slate-600 font-bold">+</span>
-            </button>
-            <button className="w-8 h-8 bg-white border border-slate-300 rounded flex items-center justify-center hover:bg-slate-50">
-              <span className="text-slate-600 font-bold">-</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Google Maps Container */}
+      <div 
+        ref={mapRef} 
+        className="w-full h-full"
+        style={{ minHeight: '400px' }}
+      />
 
       {/* Stats overlay */}
       <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
