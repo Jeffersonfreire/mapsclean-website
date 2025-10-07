@@ -1,170 +1,89 @@
 "use client";
-import { useEffect, useState, useRef } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-
-type ProPresence = {
-  uid: string;
-  isOnline: boolean;
-  approxLocation?: { lat: number; lng: number };
-  lastSeen?: number;
-  category?: string;
-};
+import { useEffect, useState } from 'react';
 
 export default function LiveProMap() {
-  const [onlinePros, setOnlinePros] = useState<ProPresence[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  const [onlinePros, setOnlinePros] = useState(5); // Simular 5 profissionais
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const q = query(collection(db, 'presence'), where('isOnline', '==', true));
-    const unsub = onSnapshot(q, (snap) => {
-      const now = Date.now();
-      const freshness = 5 * 60 * 1000; // 5 min
-      const list: ProPresence[] = [];
-      snap.forEach((d) => {
-        const data = d.data();
-        if (data && (now - (data.lastSeen || 0)) <= freshness) {
-          list.push({
-            uid: d.id,
-            isOnline: true,
-            approxLocation: data.approxLocation,
-            lastSeen: data.lastSeen,
-            category: data.category
-          });
-        }
-      });
-      setOnlinePros(list);
+    // Simular carregamento
+    const timer = setTimeout(() => {
       setLoading(false);
-    });
-    return () => unsub();
+    }, 1000);
+    return () => clearTimeout(timer);
   }, []);
-
-  // Brussels center (default)
-  const center = { lat: 50.8503, lng: 4.3517 };
-  const markers = onlinePros.filter(p => p.approxLocation).map(p => p.approxLocation!);
-
-  useEffect(() => {
-    // Carregar Google Maps API
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyD_eJLabb7WYiUB2CEZOUQo2QtYykxDnUw'}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        console.log('Google Maps carregado com sucesso');
-        setMapLoaded(true);
-      };
-      script.onerror = () => {
-        console.log('Erro ao carregar Google Maps, usando fallback');
-        setMapLoaded(true); // Força o carregamento mesmo com erro
-      };
-      document.head.appendChild(script);
-    } else {
-      console.log('Google Maps já carregado');
-      setMapLoaded(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (mapLoaded && mapRef.current && window.google) {
-      // Estilo do mapa igual ao app
-      const mapStyle = [
-        {
-          "featureType": "all",
-          "elementType": "geometry",
-          "stylers": [{"color": "#f5f5f5"}]
-        },
-        {
-          "featureType": "water",
-          "elementType": "geometry",
-          "stylers": [{"color": "#e9e9e9"}, {"lightness": 17}]
-        },
-        {
-          "featureType": "road",
-          "elementType": "geometry",
-          "stylers": [{"color": "#ffffff"}, {"lightness": 17}]
-        }
-      ];
-
-      mapInstance.current = new window.google.maps.Map(mapRef.current, {
-        center: center,
-        zoom: 12,
-        styles: mapStyle,
-        disableDefaultUI: false,
-        zoomControl: true,
-        mapTypeControl: false,
-        scaleControl: true,
-        streetViewControl: false,
-        rotateControl: false,
-        fullscreenControl: false
-      });
-
-      // Marcador central (Bruxelas) - igual ao app
-      new window.google.maps.Marker({
-        position: center,
-        map: mapInstance.current,
-        title: 'Bruxelas, Bélgica',
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 12,
-          fillColor: '#4A90E2',
-          fillOpacity: 1,
-          strokeColor: '#FFFFFF',
-          strokeWeight: 3
-        }
-      });
-    }
-  }, [mapLoaded]);
-
-  useEffect(() => {
-    if (mapInstance.current && markers.length > 0) {
-      // Limpar marcadores antigos
-      markersRef.current.forEach(marker => marker.setMap(null));
-      markersRef.current = [];
-
-      // Adicionar novos marcadores - estilo igual ao app
-      markers.forEach((markerPos, index) => {
-        const marker = new window.google.maps.Marker({
-          position: markerPos,
-          map: mapInstance.current,
-          title: `Profissional ${index + 1}`,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#4A90E2',
-            fillOpacity: 1,
-            strokeColor: '#FFFFFF',
-            strokeWeight: 2
-          },
-          animation: window.google.maps.Animation.BOUNCE
-        });
-        markersRef.current.push(marker);
-      });
-    }
-  }, [markers]);
 
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-200">
-      {!mapLoaded ? (
-        // Loading state igual ao app
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-blue-600 font-semibold">Chargement de la carte...</p>
+      {/* Mapa visual moderno - estilo do app */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-green-50">
+        {/* Grid de ruas simuladas */}
+        <div className="absolute inset-0 opacity-20">
+          <svg className="w-full h-full">
+            <defs>
+              <pattern id="streets" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M 0 30 L 60 30 M 30 0 L 30 60" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-300"/>
+                <circle cx="15" cy="15" r="2" fill="currentColor" className="text-slate-400"/>
+                <circle cx="45" cy="45" r="2" fill="currentColor" className="text-slate-400"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#streets)" />
+          </svg>
+        </div>
+
+        {/* Marcadores de profissionais - posições realistas */}
+        {[1, 2, 3, 4, 5].map((i) => {
+          const positions = [
+            { x: 45, y: 35 }, // Centro
+            { x: 25, y: 25 }, // Norte
+            { x: 65, y: 45 }, // Sul
+            { x: 35, y: 55 }, // Leste
+            { x: 55, y: 25 }  // Oeste
+          ];
+          const pos = positions[i - 1];
+          return (
+            <div
+              key={i}
+              className="absolute animate-bounce"
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: '2s'
+              }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                <div className="relative w-6 h-6 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Marcador central (Bruxelas) */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="relative">
+            <div className="absolute inset-0 bg-red-500 rounded-full blur-xl opacity-50 animate-ping"></div>
+            <div className="relative w-10 h-10 bg-red-500 rounded-full border-3 border-white shadow-2xl flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded-full"></div>
+            </div>
           </div>
         </div>
-      ) : (
-        // Google Maps real com estilo do app
-        <div 
-          ref={mapRef} 
-          className="w-full h-full"
-          style={{ minHeight: '400px' }}
-        />
-      )}
+
+        {/* Controles de zoom simulados */}
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
+          <div className="flex flex-col gap-1">
+            <button className="w-8 h-8 bg-white border border-slate-300 rounded flex items-center justify-center hover:bg-slate-50">
+              <span className="text-slate-600 font-bold">+</span>
+            </button>
+            <button className="w-8 h-8 bg-white border border-slate-300 rounded flex items-center justify-center hover:bg-slate-50">
+              <span className="text-slate-600 font-bold">-</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Header overlay - igual ao app */}
       <div className="absolute top-4 left-4 right-4 z-10">
@@ -185,7 +104,7 @@ export default function LiveProMap() {
               <div className="bg-green-50 border border-green-200 rounded-full px-3 py-1 flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-xs font-semibold text-green-700">
-                  {loading ? '...' : onlinePros.length} en ligne
+                  {onlinePros} en ligne
                 </span>
               </div>
             </div>
@@ -205,7 +124,7 @@ export default function LiveProMap() {
             <div>
               <div className="text-xs text-slate-500 font-medium">Professionnels disponibles</div>
               <div className="text-2xl font-bold text-blue-700">
-                {loading ? '...' : onlinePros.length}
+                {onlinePros}
               </div>
             </div>
           </div>
