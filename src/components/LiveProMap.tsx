@@ -1,7 +1,5 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
 
 type ProPresence = {
   uid: string;
@@ -15,26 +13,22 @@ export default function LiveProMap() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'presence'), where('isOnline', '==', true));
-    const unsub = onSnapshot(q, (snap) => {
-      const now = Date.now();
-      const freshness = 5 * 60 * 1000; // 5 min
-      const list: ProPresence[] = [];
-      snap.forEach((d) => {
-        const data = d.data();
-        if (data && (now - (data.lastSeen || 0)) <= freshness) {
-          list.push({
-            uid: d.id,
-            isOnline: true,
-            approxLocation: data.approxLocation,
-            lastSeen: data.lastSeen
-          });
-        }
-      });
-      setOnlinePros(list);
+    // Simular dados de profissionais para demo (sem conexão Firestore por enquanto)
+    const simulateData = () => {
+      const mockPros: ProPresence[] = [
+        { uid: '1', isOnline: true, approxLocation: { lat: 50.8503, lng: 4.3517 } },
+        { uid: '2', isOnline: true, approxLocation: { lat: 50.8403, lng: 4.3617 } },
+        { uid: '3', isOnline: true, approxLocation: { lat: 50.8603, lng: 4.3417 } },
+        { uid: '4', isOnline: true, approxLocation: { lat: 50.8453, lng: 4.3567 } },
+        { uid: '5', isOnline: true, approxLocation: { lat: 50.8553, lng: 4.3467 } }
+      ];
+      setOnlinePros(mockPros);
       setLoading(false);
-    });
-    return () => unsub();
+    };
+
+    // Simular carregamento
+    const timer = setTimeout(simulateData, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   // Brussels center (default)
