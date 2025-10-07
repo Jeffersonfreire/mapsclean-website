@@ -15,6 +15,9 @@ export default function LiveProMap() {
   const [onlinePros, setOnlinePros] = useState<ProPresence[]>([]);
   const [loading, setLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, 'presence'), where('isOnline', '==', true));
@@ -51,16 +54,20 @@ export default function LiveProMap() {
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyD_eJLabb7WYiUB2CEZOUQo2QtYykxDnUw'}&libraries=places`;
       script.async = true;
       script.defer = true;
-      script.onload = () => setMapLoaded(true);
+      script.onload = () => {
+        console.log('Google Maps carregado com sucesso');
+        setMapLoaded(true);
+      };
+      script.onerror = () => {
+        console.log('Erro ao carregar Google Maps, usando fallback');
+        setMapLoaded(true); // Força o carregamento mesmo com erro
+      };
       document.head.appendChild(script);
     } else {
+      console.log('Google Maps já carregado');
       setMapLoaded(true);
     }
   }, []);
-
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
     if (mapLoaded && mapRef.current && window.google) {
@@ -207,4 +214,3 @@ export default function LiveProMap() {
     </div>
   );
 }
-
