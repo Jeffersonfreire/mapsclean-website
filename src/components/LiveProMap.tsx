@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 
 type ProPresence = {
   uid: string;
@@ -13,22 +15,26 @@ export default function LiveProMap() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular dados de profissionais para demo (sem conexão Firestore por enquanto)
-    const simulateData = () => {
-      const mockPros: ProPresence[] = [
-        { uid: '1', isOnline: true, approxLocation: { lat: 50.8503, lng: 4.3517 } },
-        { uid: '2', isOnline: true, approxLocation: { lat: 50.8403, lng: 4.3617 } },
-        { uid: '3', isOnline: true, approxLocation: { lat: 50.8603, lng: 4.3417 } },
-        { uid: '4', isOnline: true, approxLocation: { lat: 50.8453, lng: 4.3567 } },
-        { uid: '5', isOnline: true, approxLocation: { lat: 50.8553, lng: 4.3467 } }
-      ];
-      setOnlinePros(mockPros);
+    const q = query(collection(db, 'presence'), where('isOnline', '==', true));
+    const unsub = onSnapshot(q, (snap) => {
+      const now = Date.now();
+      const freshness = 5 * 60 * 1000; // 5 min
+      const list: ProPresence[] = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        if (data && (now - (data.lastSeen || 0)) <= freshness) {
+          list.push({
+            uid: d.id,
+            isOnline: true,
+            approxLocation: data.approxLocation,
+            lastSeen: data.lastSeen
+          });
+        }
+      });
+      setOnlinePros(list);
       setLoading(false);
-    };
-
-    // Simular carregamento
-    const timer = setTimeout(simulateData, 1000);
-    return () => clearTimeout(timer);
+    });
+    return () => unsub();
   }, []);
 
   // Brussels center (default)
@@ -37,48 +43,73 @@ export default function LiveProMap() {
 
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-200">
-      {/* Map Background (static image for demo; real Google Maps requires API key) */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-blue-50 to-slate-100">
-        {/* Grid overlay (simulating map) */}
-        <div className="absolute inset-0 opacity-20">
+      {/* Map Background - Estilo Google Maps */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-blue-50 to-green-100">
+        {/* Ruas e avenidas simuladas */}
+        <div className="absolute inset-0 opacity-30">
           <svg className="w-full h-full">
             <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-blue-300"/>
+              <pattern id="streets" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M 0 30 L 60 30 M 30 0 L 30 60" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-400"/>
+                <circle cx="15" cy="15" r="2" fill="currentColor" className="text-slate-500"/>
+                <circle cx="45" cy="45" r="2" fill="currentColor" className="text-slate-500"/>
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
+            <rect width="100%" height="100%" fill="url(#streets)" />
           </svg>
         </div>
 
-        {/* Markers (profissionais) */}
+        {/* Marcadores de profissionais (posições realistas em Bruxelas) */}
         {markers.map((m, i) => {
-          const x = 30 + (i % 5) * 15 + Math.random() * 10;
-          const y = 20 + Math.floor(i / 5) * 20 + Math.random() * 15;
+          // Posições mais realistas baseadas em coordenadas de Bruxelas
+          const positions = [
+            { x: 45, y: 35 }, // Centro
+            { x: 25, y: 25 }, // Norte
+            { x: 65, y: 45 }, // Sul
+            { x: 35, y: 55 }, // Leste
+            { x: 55, y: 25 }  // Oeste
+          ];
+          const pos = positions[i % positions.length];
           return (
             <div
               key={i}
               className="absolute animate-bounce"
               style={{
-                left: `${x}%`,
-                top: `${y}%`,
-                animationDelay: `${i * 0.2}s`,
-                animationDuration: '2s'
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                animationDelay: `${i * 0.3}s`,
+                animationDuration: '2.5s'
               }}
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-blue-500 rounded-full blur-md opacity-50 animate-pulse"></div>
-                <div className="relative w-4 h-4 bg-blue-600 rounded-full border-2 border-white shadow-lg"></div>
+                <div className="absolute inset-0 bg-blue-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                <div className="relative w-5 h-5 bg-blue-600 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
               </div>
             </div>
           );
         })}
 
-        {/* Center marker (user location - Brussels) */}
+        {/* Marcador central (Bruxelas) */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <div className="relative">
-            <div className="absolute inset-0 bg-green-500 rounded-full blur-lg opacity-40 animate-ping"></div>
-            <div className="relative w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-xl"></div>
+            <div className="absolute inset-0 bg-red-500 rounded-full blur-xl opacity-50 animate-ping"></div>
+            <div className="relative w-8 h-8 bg-red-500 rounded-full border-3 border-white shadow-2xl flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Área de zoom simulada */}
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg">
+          <div className="flex flex-col gap-1">
+            <button className="w-8 h-8 bg-white border border-slate-300 rounded flex items-center justify-center hover:bg-slate-50">
+              <span className="text-slate-600 font-bold">+</span>
+            </button>
+            <button className="w-8 h-8 bg-white border border-slate-300 rounded flex items-center justify-center hover:bg-slate-50">
+              <span className="text-slate-600 font-bold">-</span>
+            </button>
           </div>
         </div>
       </div>
