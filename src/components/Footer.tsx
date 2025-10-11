@@ -9,8 +9,24 @@ export default function Footer() {
             <h3 className="font-semibold text-blue-900 mb-3">MAPSCLEAN</h3>
             <p className="text-sm text-slate-600">Services de nettoyage professionnels en Belgique.</p>
             <div className="flex gap-3 mt-4">
-              <a href="#" aria-label="Facebook" className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50">f</a>
-              <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50">ig</a>
+              <a
+                href="https://www.facebook.com/mapsclean"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50"
+              >
+                f
+              </a>
+              <a
+                href="https://www.instagram.com/mapsclean"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50"
+              >
+                ig
+              </a>
             </div>
           </div>
           <div>
