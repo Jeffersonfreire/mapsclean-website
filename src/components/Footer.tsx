@@ -2,12 +2,16 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-50 border-t border-slate-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid md:grid-cols-3 gap-8">
+    <footer className="bg-white border-t border-slate-100 mt-auto">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="grid md:grid-cols-4 gap-8">
           <div>
             <h3 className="font-semibold text-blue-900 mb-3">MAPSCLEAN</h3>
-            <p className="text-sm text-slate-600">Services de nettoyage professionnels en Belgique</p>
+            <p className="text-sm text-slate-600">Services de nettoyage professionnels en Belgique.</p>
+            <div className="flex gap-3 mt-4">
+              <a href="#" aria-label="Facebook" className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50">f</a>
+              <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50">ig</a>
+            </div>
           </div>
           <div>
             <h3 className="font-semibold text-blue-900 mb-3">Liens rapides</h3>
@@ -23,8 +27,15 @@ export default function Footer() {
               <Link href="/fr-BE/privacy" className="text-slate-600 hover:text-blue-700">Confidentialité</Link>
             </div>
           </div>
+          <div>
+            <h3 className="font-semibold text-blue-900 mb-3">Contact</h3>
+            <div className="text-sm text-slate-600">
+              <div>Email: contact@mapsclean.com</div>
+              <div className="mt-2">Belgique</div>
+            </div>
+          </div>
         </div>
-        <div className="border-t border-slate-200 mt-6 pt-6 text-center text-sm text-slate-600">
+        <div className="border-t border-slate-200 mt-8 pt-6 text-center text-sm text-slate-600">
           © {new Date().getFullYear()} MAPSCLEAN. Tous droits réservés.
         </div>
       </div>
