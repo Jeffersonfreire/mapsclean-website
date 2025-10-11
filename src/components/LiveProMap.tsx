@@ -38,7 +38,6 @@ interface Professional {
 export default function LiveProMap() {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -122,8 +121,7 @@ export default function LiveProMap() {
         updateMapMarkers(pros);
       },
       (err) => {
-        console.error('Erro Firebase:', err);
-        setError('Erreur de connexion');
+        console.warn('Firebase indisponível, usando fallback local:', err);
         setLoading(false);
 
         // Fallback: dados simulados se Firebase falhar
@@ -223,24 +221,24 @@ export default function LiveProMap() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
-        <div className="text-center p-6">
-          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-            </svg>
-          </div>
-          <div className="text-red-600 font-medium mb-2">Erreur de connexion</div>
-          <div className="text-red-500 text-sm">Impossible de charger la carte</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-200">
+      {/* Plano de fundo elegante quando o Google Maps ainda não carregou */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-green-50 pointer-events-none">
+        <div className="absolute inset-0 opacity-20">
+          <svg className="w-full h-full">
+            <defs>
+              <pattern id="streets-lite" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M 0 30 L 60 30 M 30 0 L 30 60" fill="none" stroke="currentColor" strokeWidth="1" className="text-slate-300"/>
+                <circle cx="15" cy="15" r="2" fill="currentColor" className="text-slate-400"/>
+                <circle cx="45" cy="45" r="2" fill="currentColor" className="text-slate-400"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#streets-lite)" />
+          </svg>
+        </div>
+      </div>
+
       {/* Google Maps Container */}
       <div 
         ref={mapRef} 
