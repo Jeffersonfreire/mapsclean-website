@@ -13,8 +13,17 @@ export default function Header({ initialLocale = 'fr-BE' }: { initialLocale?: st
   return (
     <header className="bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href={`/${locale}`} className="flex items-center gap-2">
-          <Image src="/assets/icon.png" alt="MAPSCLEAN" width={50} height={50} className="object-contain" />
+        <Link href={`/${locale}`} className="flex items-center gap-2" aria-label="MapsClean - Accueil">
+          <div className="relative h-12 w-12 md:h-14 md:w-14">
+            <Image
+              src="/assets/icon.png"
+              alt="MapsClean"
+              fill
+              priority
+              sizes="(min-width: 768px) 56px, 48px"
+              className="object-contain drop-shadow-sm"
+            />
+          </div>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-base font-medium">
           <Link href={`/${locale}`} className="text-slate-700 hover:text-blue-700 transition-colors">Accueil</Link>
