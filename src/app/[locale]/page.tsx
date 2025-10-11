@@ -1,6 +1,13 @@
 "use client";
 import Link from 'next/link';
-import LiveProMap from '@/components/LiveProMap';
+import dynamic from 'next/dynamic';
+
+const LiveProMap = dynamic(() => import('@/components/LiveProMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-white to-green-50 animate-pulse" />
+  )
+});
 
 export default function HomePage() {
   const faq = [
