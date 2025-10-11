@@ -20,6 +20,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  openGraph: {
+    title: "MapsClean — Services de nettoyage en Belgique",
+    description: "Nettoyage professionnel, paiement sécurisé, pros vérifiés.",
+    url: "https://www.mapsclean.com",
+    siteName: "MapsClean",
+    locale: "fr_BE",
+    type: "website",
+  },
   icons: {
     icon: "/favicon.ico",
   },

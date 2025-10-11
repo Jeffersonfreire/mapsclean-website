@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 const locales = ['fr-BE', 'pt-BR', 'en'] as const;
 
@@ -10,25 +10,29 @@ export default function Header({ initialLocale = 'fr-BE' }: { initialLocale?: st
   const [locale, setLocale] = useState(initialLocale);
   const pathname = usePathname();
 
+  const isActive = useMemo(() => {
+    return (href: string) => pathname === href || pathname?.startsWith(href + '/');
+  }, [pathname]);
+
   return (
-    <header className="bg-white border-b border-slate-200 shadow-sm">
+    <header className="bg-white border-b border-slate-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <Link href={`/${locale}`} className="flex items-center gap-2" aria-label="MapsClean - Accueil">
-          <div className="relative h-12 w-12 md:h-14 md:w-14">
+          <div className="relative h-12 w-12 md:h-16 md:w-16">
             <Image
               src="/assets/icon.png"
               alt="MapsClean"
               fill
               priority
-              sizes="(min-width: 768px) 56px, 48px"
+              sizes="(min-width: 768px) 64px, 48px"
               className="object-contain drop-shadow-sm"
             />
           </div>
         </Link>
         <nav className="hidden md:flex items-center gap-8 text-base font-medium">
-          <Link href={`/${locale}`} className="text-slate-700 hover:text-blue-700 transition-colors">Accueil</Link>
-          <Link href={`/${locale}/services`} className="text-slate-700 hover:text-blue-700 transition-colors">Services</Link>
-          <Link href={`/${locale}/pricing`} className="text-slate-700 hover:text-blue-700 transition-colors">Tarifs</Link>
+          <Link href={`/${locale}`} className={isActive(`/${locale}`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Accueil</Link>
+          <Link href={`/${locale}/services`} className={isActive(`/${locale}/services`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Services</Link>
+          <Link href={`/${locale}/pricing`} className={isActive(`/${locale}/pricing`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Tarifs</Link>
           <Link href={`/${locale}/login`} className="text-blue-700 hover:text-blue-800 font-semibold transition-colors">Connexion</Link>
           <Link href={`/${locale}/account`} className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg font-semibold transition-all">Mon compte</Link>
         </nav>
