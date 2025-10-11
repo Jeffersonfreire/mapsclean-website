@@ -30,8 +30,13 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-blue-900 mb-3">Contact</h3>
             <div className="text-sm text-slate-600">
-              <div>Email: contact@mapsclean.com</div>
+              <div>
+                Email: <a className="underline hover:text-blue-700" href="mailto:contact@mapsclean.com">contact@mapsclean.com</a>
+              </div>
               <div className="mt-2">Belgique</div>
+              <div className="mt-2">
+                WhatsApp: <a className="underline hover:text-blue-700" href="https://wa.me/32400000000?text=Bonjour%20MapsClean" target="_blank" rel="noopener noreferrer">+32 400 00 000</a>
+              </div>
             </div>
           </div>
         </div>

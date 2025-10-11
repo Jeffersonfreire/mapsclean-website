@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookieBanner from '@/components/CookieBanner';
+import Analytics from '@/components/Analytics';
 
 export const dynamicParams = true;
 export function generateStaticParams() {
@@ -25,6 +26,7 @@ export default async function LocaleLayout({
           <Footer />
         </div>
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   );
