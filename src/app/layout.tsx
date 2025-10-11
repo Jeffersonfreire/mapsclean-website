@@ -36,6 +36,12 @@ export const metadata: Metadata = {
     title: 'MapsClean — Services de nettoyage en Belgique',
     description: 'Nettoyage professionnel, paiement sécurisé, pros vérifiés.',
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
   themeColor: '#ffffff',
 };
 
