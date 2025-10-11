@@ -29,10 +29,10 @@ export default function Header({ initialLocale = 'fr-BE' }: { initialLocale?: st
             />
           </div>
         </Link>
-        <nav className="hidden md:flex items-center gap-8 text-base font-medium">
-          <Link href={`/${locale}`} className={isActive(`/${locale}`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Accueil</Link>
-          <Link href={`/${locale}/services`} className={isActive(`/${locale}/services`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Services</Link>
-          <Link href={`/${locale}/pricing`} className={isActive(`/${locale}/pricing`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Tarifs</Link>
+        <nav className="hidden md:flex items-center gap-8 text-base font-medium" aria-label="Navigation principale">
+          <Link href={`/${locale}`} aria-current={isActive(`/${locale}`) ? 'page' : undefined} className={isActive(`/${locale}`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Accueil</Link>
+          <Link href={`/${locale}/services`} aria-current={isActive(`/${locale}/services`) ? 'page' : undefined} className={isActive(`/${locale}/services`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Services</Link>
+          <Link href={`/${locale}/pricing`} aria-current={isActive(`/${locale}/pricing`) ? 'page' : undefined} className={isActive(`/${locale}/pricing`) ? 'text-blue-800 font-semibold' : 'text-slate-700 hover:text-blue-700 transition-colors'}>Tarifs</Link>
           <Link href={`/${locale}/login`} className="text-blue-700 hover:text-blue-800 font-semibold transition-colors">Connexion</Link>
           <Link href={`/${locale}/account`} className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg font-semibold transition-all">Mon compte</Link>
         </nav>

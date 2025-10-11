@@ -31,6 +31,12 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MapsClean — Services de nettoyage en Belgique',
+    description: 'Nettoyage professionnel, paiement sécurisé, pros vérifiés.',
+  },
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
