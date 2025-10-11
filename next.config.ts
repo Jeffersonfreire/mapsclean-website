@@ -16,6 +16,20 @@ const nextConfig: NextConfig = {
       ],
     },
   ],
+  redirects: async () => [
+    {
+      source: '/:path*',
+      has: [{ type: 'host', value: 'mapsclean-web.onrender.com' }],
+      destination: 'https://www.mapsclean.com/:path*',
+      permanent: true,
+    },
+    {
+      source: '/:path*',
+      has: [{ type: 'host', value: 'mapsclean.com' }],
+      destination: 'https://www.mapsclean.com/:path*',
+      permanent: true,
+    },
+  ],
   webpack: (config) => {
     // Polyfills for Node globals in browser (dev)
     config.resolve.fallback = {
