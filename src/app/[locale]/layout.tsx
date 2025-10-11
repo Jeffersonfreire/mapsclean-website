@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookieBanner from '@/components/CookieBanner';
 import Analytics from '@/components/Analytics';
+import SkipToContent from '@/components/SkipToContent';
 
 export const dynamicParams = true;
 export function generateStaticParams() {
@@ -20,9 +21,10 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
+        <SkipToContent />
         <div className="min-h-screen flex flex-col">
           <Header initialLocale={locale} />
-          <main className="flex-1">{children}</main>
+          <main id="main-content" className="flex-1">{children}</main>
           <Footer />
         </div>
         <CookieBanner />
