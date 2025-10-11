@@ -1,6 +1,7 @@
 "use client";
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import MobileStickyCTA from '@/components/MobileStickyCTA';
 
 const LiveProMap = dynamic(() => import('@/components/LiveProMap'), {
   ssr: false,
@@ -99,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-4 py-12 md:px-12 lg:px-20 bg-gradient-to-r from-blue-700 to-blue-900 text-white">
+      <section className="px-4 pb-24 pt-12 md:px-12 lg:px-20 bg-gradient-to-r from-blue-700 to-blue-900 text-white">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <h2 className="text-2xl md:text-4xl font-bold">Prêt à réserver votre service?</h2>
           <p className="text-base md:text-xl opacity-90">Professionnels qualifiés disponibles dans toute la Belgique</p>
@@ -108,6 +109,9 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Mobile sticky CTA */}
+      <MobileStickyCTA href="/fr-BE/order" label="Réserver maintenant" />
     </>
   );
 }
