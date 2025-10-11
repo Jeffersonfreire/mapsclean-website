@@ -3,8 +3,8 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-slate-100 mt-auto">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="grid md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10">
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div>
             <h3 className="font-semibold text-blue-900 mb-3">MAPSCLEAN</h3>
             <p className="text-sm text-slate-600">Services de nettoyage professionnels en Belgique.</p>
@@ -56,7 +56,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="border-t border-slate-200 mt-8 pt-6 text-center text-sm text-slate-600">
+        <div className="border-t border-slate-200 mt-6 md:mt-8 pt-4 md:pt-6 text-center text-sm text-slate-600">
           © {new Date().getFullYear()} MAPSCLEAN. Tous droits réservés.
         </div>
       </div>

@@ -16,9 +16,9 @@ export default function Header({ initialLocale = 'fr-BE' }: { initialLocale?: st
 
   return (
     <header className="bg-white border-b border-slate-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
         <Link href={`/${locale}`} className="flex items-center gap-2" aria-label="MapsClean - Accueil">
-          <div className="relative h-12 w-12 md:h-16 md:w-16">
+          <div className="relative h-10 w-10 md:h-16 md:w-16">
             <Image
               src="/assets/icon.png"
               alt="MapsClean"
@@ -36,9 +36,9 @@ export default function Header({ initialLocale = 'fr-BE' }: { initialLocale?: st
           <Link href={`/${locale}/login`} className="text-blue-700 hover:text-blue-800 font-semibold transition-colors">Connexion</Link>
           <Link href={`/${locale}/account`} className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg font-semibold transition-all">Mon compte</Link>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <select
-            className="border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium bg-white text-slate-700 cursor-pointer"
+            className="border border-slate-300 rounded-lg px-2 py-1.5 md:px-3 md:py-2 text-sm font-medium bg-white text-slate-700 cursor-pointer"
             value={locale}
             onChange={(e) => {
               const next = e.target.value;
