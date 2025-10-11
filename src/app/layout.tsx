@@ -43,6 +43,20 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'MapsClean',
+              url: 'https://www.mapsclean.com',
+              logo: 'https://www.mapsclean.com/assets/icon.png',
+              sameAs: []
+            }),
+          }}
+        />
         {children}
       </body>
     </html>
